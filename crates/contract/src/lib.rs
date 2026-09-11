@@ -22,6 +22,8 @@ pub mod error;
 pub mod java;
 /// 在线隧道相关模型。
 pub mod online;
+/// 玩家查询相关模型。
+pub mod player;
 /// 网络代理配置模型。
 pub mod proxy;
 /// 服务器进程管理相关模型。
@@ -58,6 +60,10 @@ pub use error::InstanceServiceError;
 pub use error::JavaServiceError;
 /// 在线隧道服务错误枚举。
 pub use error::OnlineTunnelServiceError;
+/// 玩家列表查询错误枚举。
+pub use error::PlayerListError;
+/// 玩家查询错误枚举。
+pub use error::PlayerLookupError;
 /// 服务端检查与实例供给计划失败类别。
 pub use error::ProvisioningServiceError;
 /// 服务器核心下载目录错误枚举。
@@ -81,6 +87,8 @@ pub use online::{
     OnlineTunnelConnection, OnlineTunnelEvent, OnlineTunnelHostRequest, OnlineTunnelJoinRequest,
     OnlineTunnelMode, OnlineTunnelStatus,
 };
+/// 玩家查询模型。
+pub use player::{BanEntryDto, OpEntryDto, PlayerEntryDto, PlayerProfile};
 /// 网络代理配置模型。
 pub use proxy::{ProxyConfigError, ProxyMode, ProxySettings};
 /// 设置模型。

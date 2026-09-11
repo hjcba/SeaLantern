@@ -14,9 +14,10 @@ use crate::plugin::{ApplicationPluginReadHost, CorePluginService, PluginServiceE
 use crate::port::OnlineTunnelService;
 use crate::service::{
     CoreBackupService, CoreConsoleService, CoreCronTaskService, CoreDownloadService,
-    CoreInstanceService, CoreJavaService, CoreOnlineTunnelService, CoreProvisioningService,
-    CoreServerCatalogService, CoreServerConfigService, CoreServerService, CoreSettingsService,
-    CoreSystemService, CoreUpdateCheckService, CoreUpdateInstallService, ProxyMonitoringService,
+    CoreInstanceService, CoreJavaService, CoreOnlineTunnelService, CorePlayerService,
+    CoreProvisioningService, CoreServerCatalogService, CoreServerConfigService, CoreServerService,
+    CoreSettingsService, CoreSystemService, CoreUpdateCheckService, CoreUpdateInstallService,
+    ProxyMonitoringService,
 };
 
 /// 应用服务聚合句柄；由宿主 composition root 创建并显式传递。
@@ -64,6 +65,8 @@ pub struct AppServicesInner {
     pub update: Arc<CoreUpdateCheckService>,
     /// 应用更新安装服务。
     pub update_install: Arc<CoreUpdateInstallService>,
+    /// 玩家查询服务。
+    pub player: Arc<CorePlayerService>,
     /// 惰性初始化的应用插件服务。
     plugin: tokio::sync::OnceCell<Arc<CorePluginService>>,
 }
@@ -84,9 +87,9 @@ impl AppServices {
                 console: Arc::new(CoreConsoleService::new(instance.clone())),
                 cron: Arc::new(CoreCronTaskService::new(server.clone())),
                 system: Arc::new(CoreSystemService::new(instance.clone(), server.clone())),
-                server,
+                server: server.clone(),
                 server_config: Arc::new(CoreServerConfigService),
-                instance,
+                instance: instance.clone(),
                 java: Arc::new(CoreJavaService),
                 online_tunnel: Arc::new(CoreOnlineTunnelService::default()),
                 catalog: Arc::new(CoreServerCatalogService),
@@ -95,6 +98,7 @@ impl AppServices {
                 proxy_monitoring: Arc::new(ProxyMonitoringService::new()),
                 update: Arc::new(CoreUpdateCheckService::new()),
                 update_install: Arc::new(CoreUpdateInstallService),
+                player: Arc::new(CorePlayerService::new(instance, server)),
                 plugin: tokio::sync::OnceCell::new(),
             }),
         }
@@ -233,6 +237,11 @@ impl AppServices {
     /// 访问应用更新安装服务（`Arc` 共享句柄，clone 廉价）。
     pub fn update_install(&self) -> &Arc<CoreUpdateInstallService> {
         &self.inner.update_install
+    }
+
+    /// 访问玩家查询服务（`Arc` 共享句柄，clone 廉价）。
+    pub fn player(&self) -> &Arc<CorePlayerService> {
+        &self.inner.player
     }
 
     /// 获取应用插件服务；首次调用才打开策略数据库，避免阻塞常规启动路径。
